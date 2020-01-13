@@ -1,23 +1,37 @@
 const express = require('express'),
     bodyParser = require('body-parser'),
+    mongoose = require('mongoose'),
     app = express();
 
+const db = require('./config/keys').MongoURI;
+mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true})
+        .then(() => console.log('MongoDB Connected'))
+        .catch(err => console.log(err));
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended : true}));
 
-var campgrounds = [
-    {name: 'Salomon Creek', image: 'https://images.unsplash.com/photo-1520824071669-892f70d8a23d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=697&q=80'},
-    {name: 'Granite Hill', image: 'https://images.unsplash.com/photo-1520824071669-892f70d8a23d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=697&q=80'},
-    {name: "Mountain Goat's Rest", image: 'https://images.unsplash.com/photo-1520824071669-892f70d8a23d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=697&q=80'}
-];
+const campgroundSchema = new mongoose.Schema({
+    name: String,
+    image: String,
+    description: String
+});
+
+const Campground = mongoose.model('Campground', campgroundSchema);
+
 
 app.get('/', function(req, res){
     res.render('landing');
 });
 
 app.get('/campgrounds', function(req, res){
-    res.render('campgrounds', {campgrounds : campgrounds});
+    Campground.find({}, function(err, campgrounds){
+        if (err) {
+            console.log(err);  
+        } else{
+            res.render('index', {campgrounds : campgrounds});
+        }
+    });
 });
 
 app.get('/campgrounds/new', function(req, res){
@@ -25,11 +39,26 @@ app.get('/campgrounds/new', function(req, res){
 });
 
 app.post('/campgrounds', function(req, res){
-    const newCampground = req.body;
-    campgrounds.push(newCampground);
-    res.redirect('/campgrounds');
+    const { name, image, description } = req.body.campground;
+    const newCampground = new Campground({
+        name,
+        image,
+        description
+    });
+    newCampground.save()
+                    .then(res.redirect('/campgrounds'))
+                    .catch(err => console.log(err));
 });
 
+app.get('/campgrounds/:id', function(req, res){
+    Campground.findById(req.params.id, function(err, campground){
+        if (err) {
+            console.log(err);
+        } else {
+            res.render('show', {campground : campground});
+        }
+    });
 
+});
 const port = process.env.port || 5000;
-app.listen(port, console.log(`YelpCamp Server started at ${port}`));
+app.listen(port, console.log(`YelpCamp Server started on port ${port}`));
