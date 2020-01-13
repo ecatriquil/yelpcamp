@@ -3,22 +3,19 @@ const express = require('express'),
     mongoose = require('mongoose'),
     app = express();
 
+const Campground = require('./models/campgrounds');
+const seedDB = require('./seeds');
+
 const db = require('./config/keys').MongoURI;
 mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true})
         .then(() => console.log('MongoDB Connected'))
         .catch(err => console.log(err));
 
+seedDB();
+
+
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended : true}));
-
-const campgroundSchema = new mongoose.Schema({
-    name: String,
-    image: String,
-    description: String
-});
-
-const Campground = mongoose.model('Campground', campgroundSchema);
-
 
 app.get('/', function(req, res){
     res.render('landing');
@@ -51,7 +48,7 @@ app.post('/campgrounds', function(req, res){
 });
 
 app.get('/campgrounds/:id', function(req, res){
-    Campground.findById(req.params.id, function(err, campground){
+    Campground.findById(req.params.id).populate('comments').exec(function(err, campground){
         if (err) {
             console.log(err);
         } else {
