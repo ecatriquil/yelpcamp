@@ -4,6 +4,7 @@ const express = require('express'),
     app = express();
 
 const Campground = require('./models/campgrounds');
+const Comment = require('./models/comment');
 const seedDB = require('./seeds');
 
 const db = require('./config/keys').MongoURI;
@@ -26,13 +27,13 @@ app.get('/campgrounds', function(req, res){
         if (err) {
             console.log(err);  
         } else{
-            res.render('index', {campgrounds : campgrounds});
+            res.render('campgrounds/index', {campgrounds : campgrounds});
         }
     });
 });
 
 app.get('/campgrounds/new', function(req, res){
-    res.render('new');
+    res.render('campgrounds/new');
 });
 
 app.post('/campgrounds', function(req, res){
@@ -52,10 +53,40 @@ app.get('/campgrounds/:id', function(req, res){
         if (err) {
             console.log(err);
         } else {
-            res.render('show', {campground : campground});
+            res.render('campgrounds/show', {campground : campground});
         }
     });
-
 });
+
+app.get('/campgrounds/:id/comments/new', function(req,res){
+    Campground.findById(req.params.id, function(err, campground){
+        if (err) {
+            console.log(err);  
+        } else {
+            res.render('comments/new', {campground : campground})
+        }
+    });
+});
+
+app.post('/campgrounds/:id/comments', function(req, res){
+    Campground.findById(req.params.id, function(err, campground){
+        if (err) {
+            console.log(err);
+            res.redirect('/campgrounds');
+        } else {
+            Comment.create(req.body.comment, function(err,comment){
+                if (err) {
+                    console.log(err);
+                    
+                } else {
+                    campground.comments.push(comment);
+                    campground.save();
+                    res.redirect(`/campgrounds/${campground._id}`);
+                }
+            })
+        }
+    });
+});
+
 const port = process.env.port || 5000;
 app.listen(port, console.log(`YelpCamp Server started on port ${port}`));
