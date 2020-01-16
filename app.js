@@ -15,7 +15,7 @@ mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true})
         .then(() => console.log('MongoDB Connected'))
         .catch(err => console.log(err));
 
-seedDB();
+// seedDB();
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + "/public"));
