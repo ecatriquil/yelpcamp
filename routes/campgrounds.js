@@ -18,10 +18,16 @@ router.get('/new', isLoggedIn ,function(req, res){
 
 router.post('/', isLoggedIn ,function(req, res){
     const { name, image, description } = req.body.campground;
+    const { id, username } = req.user;
+    const author = {
+        id,
+        username
+    }
     const newCampground = new Campground({
         name,
         image,
-        description
+        description,
+        author
     });
     newCampground.save()
                     .then(res.redirect('/campgrounds'))
