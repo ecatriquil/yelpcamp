@@ -20,7 +20,7 @@ router.get('/new', middleware.isLoggedIn ,function(req, res){
 });
 
 router.post('/', middleware.isLoggedIn ,function(req, res){
-    const { name, image, description } = req.body.campground;
+    const { name, price, image, description } = req.body.campground;
     const { id, username } = req.user;
     const author = {
         id,
@@ -28,6 +28,7 @@ router.post('/', middleware.isLoggedIn ,function(req, res){
     }
     const newCampground = new Campground({
         name,
+        price,
         image,
         description,
         author
