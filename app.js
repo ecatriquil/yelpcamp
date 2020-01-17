@@ -12,11 +12,15 @@ const Comment = require('./models/comment');
 const User = require('./models/user');
 const seedDB = require('./seeds');
 
-const db = require('./config/keys').MongoURI;
-mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true})
+// const db = require('./config/keys').MongoURI;
+// mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true})
+//         .then(() => console.log('MongoDB Connected'))
+//         .catch(err => console.log(err));
+
+var url = process.env.DATABASEURL || 'mongodb://localhost/yelp_camp'
+mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true})
         .then(() => console.log('MongoDB Connected'))
         .catch(err => console.log(err));
-
 // seedDB();
 
 app.set('view engine', 'ejs');
